@@ -2,11 +2,14 @@ package com.example.spring_boot.controller;
 
 import com.example.spring_boot.entity.Task;
 import com.example.spring_boot.repo.TaskRepository;
+import dto.TaskCreateRequest;
+import dto.TaskUpdateRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 
@@ -31,16 +34,28 @@ public class TaskController {
     }
 
     @PostMapping
-    public Task create(@RequestBody Task task) {
+    public Task create(@RequestBody TaskCreateRequest request) {
+        Task task = new Task();
+        task.setTitle(request.getTitle());
+        task.setDescription(request.getDescription());
+        task.setCompleted(false);
         return repository.save(task);
     }
 
-    @PatchMapping("/{id}/completed")
-    public Task markAsCompleted(@PathVariable Long id) {
-        Task task = repository.findById(id)
+    @PatchMapping("/{id}")
+    public Task update(@PathVariable Long id, @RequestBody TaskUpdateRequest updates) {
+        Task originalTask = repository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found"));
-        task.setCompleted(true);
-        return repository.save(task);
+        if (updates.getTitle() != null) {
+            originalTask.setTitle(updates.getTitle());
+        }
+        if (updates.getDescription() != null) {
+            originalTask.setDescription(updates.getDescription());
+        }
+        if (updates.getCompleted() != null) {
+            originalTask.setCompleted(updates.getCompleted());
+        }
+        return repository.save(originalTask);
     }
 
     @DeleteMapping("/{id}")
