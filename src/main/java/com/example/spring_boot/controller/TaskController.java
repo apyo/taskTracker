@@ -3,6 +3,7 @@ package com.example.spring_boot.controller;
 import com.example.spring_boot.entity.Task;
 import com.example.spring_boot.repo.TaskRepository;
 import dto.TaskCreateRequest;
+import dto.TaskResponse;
 import dto.TaskUpdateRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,7 +12,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/tasks")
@@ -23,13 +23,26 @@ public class TaskController {
     }
 
     @GetMapping
-    public List<Task> getAll() {
-        return repository.findAll();
+    public List<TaskResponse> getAll(
+            @RequestParam(required = false) Instant time,
+            @RequestParam(required = false) Boolean completed
+    ) {
+        List<Task> tasks;
+        if (time != null && completed != null) {
+            tasks = repository.findByCreatedAtBeforeAndCompleted(time, completed);
+        } else if (time != null) {
+            tasks = repository.findByCreatedAtBefore(time);
+        } else if (completed != null) {
+            tasks = repository.findByCompleted(completed);
+        } else {
+            tasks = repository.findAll();
+        }
+        return tasks.stream().map(TaskResponse::new).toList();
     }
 
     @GetMapping("/{id}")
-    public Task getTask(@PathVariable Long id) {
-        return repository.findById(id)
+    public TaskResponse getTask(@PathVariable Long id) {
+        return repository.findById(id).map(TaskResponse::new)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found"));
     }
 
