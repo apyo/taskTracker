@@ -5,6 +5,7 @@ import com.example.spring_boot.repo.TaskRepository;
 import dto.TaskCreateRequest;
 import dto.TaskResponse;
 import dto.TaskUpdateRequest;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -47,7 +48,7 @@ public class TaskController {
     }
 
     @PostMapping
-    public Task create(@RequestBody TaskCreateRequest request) {
+    public Task create(@Valid @RequestBody TaskCreateRequest request) {
         Task task = new Task();
         task.setTitle(request.getTitle());
         task.setDescription(request.getDescription());
@@ -56,7 +57,7 @@ public class TaskController {
     }
 
     @PatchMapping("/{id}")
-    public Task update(@PathVariable Long id, @RequestBody TaskUpdateRequest updates) {
+    public Task update(@PathVariable Long id, @Valid @RequestBody TaskUpdateRequest updates) {
         Task originalTask = repository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found"));
         if (updates.getTitle() != null) {
