@@ -6,6 +6,7 @@ import dto.TaskCreateRequest;
 import dto.TaskResponse;
 import dto.TaskUpdateRequest;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,17 +27,18 @@ public class TaskController {
     @GetMapping
     public List<TaskResponse> getAll(
             @RequestParam(required = false) Instant time,
-            @RequestParam(required = false) Boolean completed
+            @RequestParam(required = false) Boolean completed,
+            Sort sort
     ) {
         List<Task> tasks;
         if (time != null && completed != null) {
-            tasks = repository.findByCreatedAtBeforeAndCompleted(time, completed);
+            tasks = repository.findByCreatedAtBeforeAndCompleted(time, completed, sort);
         } else if (time != null) {
-            tasks = repository.findByCreatedAtBefore(time);
+            tasks = repository.findByCreatedAtBefore(time, sort);
         } else if (completed != null) {
-            tasks = repository.findByCompleted(completed);
+            tasks = repository.findByCompleted(completed, sort);
         } else {
-            tasks = repository.findAll();
+            tasks = repository.findAll(sort);
         }
         return tasks.stream().map(TaskResponse::new).toList();
     }
