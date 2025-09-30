@@ -9,8 +9,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -66,6 +66,31 @@ public class TaskControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value("Test item 1 edited"))
                 .andExpect(jsonPath("$.completed").value(true));
+
+    }
+
+    @Test
+    public void deleteTask_shouldReturnNoContent() throws Exception {
+
+        mockMvc.perform(post("/api/tasks")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"title\":\"Test item 1\"}"))
+                .andExpect(status().isOk());
+
+        Long taskId = repository.findAll().getFirst().getId();
+
+        mockMvc.perform(delete("/api/tasks/" + taskId))
+                .andExpect(status().isNoContent());
+
+        assertTrue(repository.findById(taskId).isEmpty());
+
+    }
+
+    @Test
+    public void deleteTask_shouldReturnNotFoundForWrongId() throws Exception {
+
+        mockMvc.perform(delete("/api/tasks/9999"))
+                .andExpect(status().isNotFound());
 
     }
 }
