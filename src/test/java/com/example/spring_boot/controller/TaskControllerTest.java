@@ -70,6 +70,16 @@ public class TaskControllerTest {
     }
 
     @Test
+    public void updateTask_shouldReturnNotFound() throws Exception {
+        mockMvc.perform(patch("/api/tasks/9999")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"title\":\"Test item 1 edited\", \"completed\":true}"))
+
+                .andExpect(status().isNotFound());
+
+    }
+
+    @Test
     public void deleteTask_shouldReturnNoContent() throws Exception {
 
         mockMvc.perform(post("/api/tasks")
