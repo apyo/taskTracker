@@ -50,6 +50,16 @@ public class TaskControllerTest {
     }
 
     @Test
+    public void getTask_shouldReturnNotFound() throws Exception {
+
+        mockMvc.perform(get("/api/tasks/9999"))
+
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").value("Task not found"));
+
+    }
+
+    @Test
     public void updateTask_shouldUpdateValue() throws Exception {
 
         mockMvc.perform(post("/api/tasks")
@@ -75,7 +85,8 @@ public class TaskControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"title\":\"Test item 1 edited\", \"completed\":true}"))
 
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").value("Task not found"));
 
     }
 
@@ -100,7 +111,8 @@ public class TaskControllerTest {
     public void deleteTask_shouldReturnNotFoundForWrongId() throws Exception {
 
         mockMvc.perform(delete("/api/tasks/9999"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").value("Task not found"));
 
     }
 }
